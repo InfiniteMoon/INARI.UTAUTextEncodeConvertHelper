@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using Microsoft.VisualBasic.Devices;
 using System.ComponentModel;
-using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+
 // ReSharper disable InconsistentNaming
 // ReSharper disable LocalizableElement
 
@@ -384,7 +385,7 @@ namespace UTAUTextEncodeConvertHelper
                 int progress = (int)((float)processedFiles / totalFiles * 100);
                 backgroundWorker.ReportProgress(progress);
             }*/
-           
+
 
 
             if (MyEncode == null)
@@ -406,7 +407,7 @@ namespace UTAUTextEncodeConvertHelper
         {
             int i = 1;
             var folder = new DirectoryInfo(path);
-            foreach (var file in folder.GetFiles("*.*"))
+            Parallel.ForEach(folder.GetFiles("*.*"), file =>
             {
                 try
                 {
@@ -421,12 +422,10 @@ namespace UTAUTextEncodeConvertHelper
                 {
                     MyMsg += $"[Warning] {exp.Message}\n\r";
                 }
+
                 backgroundWorker.ReportProgress(i++);
-            }
-            foreach (var subfolder in folder.GetDirectories())
-            {
-                RecursiveRename(subfolder.FullName, targetEncoding);
-            }
+            });
+            Parallel.ForEach(folder.GetDirectories(), subfolder => RecursiveRename(subfolder.FullName, targetEncoding));
         }
 
 
